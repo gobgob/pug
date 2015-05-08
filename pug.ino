@@ -6,7 +6,9 @@
 #define leftMotorPin1 9
 #define leftMotorPin2 10
 
-#define starterServoPin 7
+#define starterServoPin 15
+
+#define rotateTime 750
 
 // Globals vars
 Servo starterServo;
@@ -68,7 +70,7 @@ void stopMotors() {
 void rotateRight() {
   setLeftSpeed( 60 );
   setRightSpeed( -60 );
-  delay(1500);
+  delay(rotateTime);
   stopMotors();
 }
 
@@ -78,7 +80,7 @@ void rotateRight() {
 void rotateLeft() {
   setLeftSpeed( -60 );
   setRightSpeed( 60 );
-  delay(1500);
+  delay(rotateTime);
   stopMotors();
 }
 
@@ -180,20 +182,26 @@ void serialExecute()
   {
     case 'I': // Initialize
       setLeftSpeed(20);
-    break;
+      break;
     case 'R': // Rotation
       if (serialInput[1] == 'L') rotateLeft();
       else rotateRight();
       break;
 
-    case 'F': // Booth motor
+    case 'F': // Front direction
       setLeftSpeed( serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]);
       setRightSpeed( serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]);
+      delay(1500);
+      setLeftSpeed( -2 );
+      setRightSpeed( -2);
+      delay(400);
+      stopMotors();
       break;
 
-    case 'B': // Booth motor
+    case 'B': // Back direction
       setLeftSpeed( (serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]) * -1);
       setRightSpeed( (serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]) * -1);
+
       break;
 
     case 'S': // Starting block
