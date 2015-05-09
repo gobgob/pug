@@ -13,6 +13,10 @@
 
 #define rotateTime 600
 
+int ultraBuffer[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+int ultraCompteur;
+int ultraSum;
+
 // Globals vars
 Servo starterServo;
 
@@ -28,22 +32,29 @@ void forwardRight() {
   digitalWrite(rightMotorPin2, HIGH);
 }
 
-boolean ultraCheck(){
+long ultraMesure() {
   /* Utilisation du capteur Ultrason HC-SR04 */
 
-long lecture_echo;
-long cm;
+  long lecture_echo;
+  long cm;
 
   digitalWrite(ultraTrig, HIGH);
   delayMicroseconds(10);
   digitalWrite(ultraTrig, LOW);
   lecture_echo = pulseIn(ultraEcho, HIGH);
-  cm = lecture_echo / 58;
-  Serial.print("Distancem : ");
-  Serial.print(cm);
-  Serial.println("cm");
-  delay(10);
+  cm = lecture_echo/29;
+
+  return cm;
+}
+
+void ultraCheck(int ultraBuffer[10]) {
+  long cm = 0;
+  for (int i = 0; i < 10; i++) {
+    cm += ultraBuffer[i] / 10;
   }
+
+  Serial.println(cm);
+}
 
 void stopRight() {
   digitalWrite(rightMotorPin1, LOW);
@@ -155,11 +166,16 @@ void setup() {
   // Motor Left
   pinMode(rightMotorPin1, OUTPUT);
   pinMode(rightMotorPin2, OUTPUT);
-  
+
   // Ultrason
   pinMode(ultraTrig, OUTPUT);
   digitalWrite(ultraTrig, LOW);
   pinMode(ultraEcho, INPUT);
+  ultraCompteur = 1;
+  ultraSum = 0;
+  
+  //DebugLed
+  pinMode(13,OUTPUT);
 
   // Serial
   Serial.begin(9600);
@@ -169,7 +185,20 @@ void setup() {
 
 void loop() {
   // TODO Script to win here ;)
-  ultraCheck();
+  int i = ultraCompteur % 10;
+  int first_i = (ultraCompteur + 1) % 10;
+  ultraBuffer[i] = ultraMesure();
+  ultraSum += ultraBuffer[i];
+  ultraSum -= ultraBuffer[first_i];
+
+if (ultraSum/10 < 20){
+  digitalWrite(13,HIGH);
+  } else {
+    digitalWrite(13,LOW);
+    }
+  ultraCompteur++;
+
+
 }
 
 // Serial
@@ -213,18 +242,18 @@ void serialExecute()
 
     case 'r':
     case 'R': // Rotation
-      if (serialInput[1] == 'L' || serialInput[1] == 'l'){
+      if (serialInput[1] == 'L' || serialInput[1] == 'l') {
         rotateLeft();
         Serial.println("Step left!");
-        }
+      }
       else {
         rotateRight();
         Serial.println("Step right!");
-        }
+      }
       break;
     case 'f':
     case 'F': // Front direction
-    Serial.println("Go!");
+      Serial.println("Go!");
       setLeftSpeed( serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]);
       setRightSpeed( serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]);
       delay(1500);
@@ -235,25 +264,25 @@ void serialExecute()
       break;
     case 'b':
     case 'B': // Back direction
-    Serial.println("Revert revert revert!");
+      Serial.println("Revert revert revert!");
       setLeftSpeed( (serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]) * -1);
       setRightSpeed( (serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]) * -1);
 
       break;
     case 's':
     case 'S': // Starting block
-    Serial.println("Lock'n'load!");
+      Serial.println("Lock'n'load!");
       prepareToStart();
       break;
     case 'g':
     case 'G': // GO !!!
-    Serial.println("Smooth splosh");
+      Serial.println("Smooth splosh");
       smoothSploch();
       break;
     case 'W':
     case 'w': // Emergy stop
-     Serial.println("Emergency Stop!!");
-               stopMotors();
+      Serial.println("Emergency Stop!!");
+      stopMotors();
       break;
 
     default:
