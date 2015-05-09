@@ -1,18 +1,21 @@
 #include <Servo.h>
 
-#define rightMotorPin1 12
-#define rightMotorPin2 11
+#define rightMotorPin1 6
+#define rightMotorPin2 5
 
-#define leftMotorPin1 9
-#define leftMotorPin2 10
+#define leftMotorPin1 3
+#define leftMotorPin2 4
 
-#define ultraTrig 14
-#define ultraEcho 15
+IntervalTimer motorTimer;
 
-#define starterServoPin 18
+#define ultraTrig 20
+#define ultraEcho 21
+
+#define starterServoPin 19
 
 #define rotateTime 600
 
+IntervalTimer ultraTimer;
 int ultraBuffer[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int ultraCompteur;
 int ultraSum;
@@ -42,18 +45,25 @@ long ultraMesure() {
   delayMicroseconds(10);
   digitalWrite(ultraTrig, LOW);
   lecture_echo = pulseIn(ultraEcho, HIGH);
-  cm = lecture_echo/29;
+  cm = lecture_echo / 29;
 
   return cm;
 }
 
-void ultraCheck(int ultraBuffer[10]) {
-  long cm = 0;
-  for (int i = 0; i < 10; i++) {
-    cm += ultraBuffer[i] / 10;
-  }
+void ultraCheck(void) {
+  int i = ultraCompteur % 10;
+  int first_i = (ultraCompteur + 1) % 10;
+  ultraBuffer[i] = ultraMesure();
+  ultraSum += ultraBuffer[i];
+  ultraSum -= ultraBuffer[first_i];
+  Serial.println(ultraSum / 10);
 
-  Serial.println(cm);
+  if (ultraSum / 10 < 20) {
+    digitalWrite(13, HIGH);
+  } else {
+    digitalWrite(13, LOW);
+  }
+  ultraCompteur++;
 }
 
 void stopRight() {
@@ -122,7 +132,7 @@ void smoothSploch () {
     delay(50);
   }
   starterServo.detach();
-  initializeTimer1();
+  //  initializeTimer1();
 }
 
 void prepareToStart () {
@@ -133,29 +143,18 @@ void prepareToStart () {
 /**
  * Interrupt service routine
  **/
-ISR(TIMER1_OVF_vect)
+void manageMotors()
 {
   loopCounter = (loopCounter + 1) % 200;
-  TCNT1 = 64286; // preload timer
-
-  if (leftSpeed == 100) stopLeft();
-  else if (loopCounter >= leftSpeed)forwardLeft();
-  else backwardLeft();
 
   if (rightSpeed == 100) stopRight();
   else if (loopCounter >= rightSpeed)forwardRight();
   else backwardRight();
-}
+  
+  if (leftSpeed == 100) stopLeft();
+  else if (loopCounter >= leftSpeed)forwardLeft();
+  else backwardLeft();
 
-void initializeTimer1 () {
-  noInterrupts();           // disable all interrupts
-  TCCR1A = 0;
-  TCCR1B = 0;
-
-  TCNT1 = 64286;            // preload timer
-  TCCR1B |= (1 << CS10);    // 0 prescaler
-  TIMSK1 |= (1 << TOIE1);   // enable timer overflow interrupt
-  interrupts();             // enable all interrupts
 }
 
 void setup() {
@@ -167,38 +166,27 @@ void setup() {
   pinMode(rightMotorPin1, OUTPUT);
   pinMode(rightMotorPin2, OUTPUT);
 
+  motorTimer.begin(manageMotors, 30);
+
   // Ultrason
+  ultraTimer.begin(ultraCheck, 50000);
   pinMode(ultraTrig, OUTPUT);
   digitalWrite(ultraTrig, LOW);
   pinMode(ultraEcho, INPUT);
   ultraCompteur = 1;
   ultraSum = 0;
-  
+
   //DebugLed
-  pinMode(13,OUTPUT);
+  pinMode(13, OUTPUT);
 
   // Serial
   Serial.begin(9600);
 
-  initializeTimer1();
+  //  initializeTimer1();
 }
 
 void loop() {
   // TODO Script to win here ;)
-  int i = ultraCompteur % 10;
-  int first_i = (ultraCompteur + 1) % 10;
-  ultraBuffer[i] = ultraMesure();
-  ultraSum += ultraBuffer[i];
-  ultraSum -= ultraBuffer[first_i];
-
-if (ultraSum/10 < 20){
-  digitalWrite(13,HIGH);
-  } else {
-    digitalWrite(13,LOW);
-    }
-  ultraCompteur++;
-
-
 }
 
 // Serial
@@ -235,11 +223,6 @@ void serialExecute()
 {
   switch (serialInput[0])
   {
-    case 'i':
-    case 'I': // Initialize
-      initializeTimer1();
-      break;
-
     case 'r':
     case 'R': // Rotation
       if (serialInput[1] == 'L' || serialInput[1] == 'l') {
@@ -284,6 +267,19 @@ void serialExecute()
       Serial.println("Emergency Stop!!");
       stopMotors();
       break;
+
+    case 'd':
+    case 'D':
+      Serial.println("Right on");
+      setRightSpeed( 30);
+      break;
+
+    case 'l':
+    case 'L':
+      Serial.println("left on");
+      setLeftSpeed( 30);
+      break;
+
 
     default:
       Serial.print("Unkwnown command (");
