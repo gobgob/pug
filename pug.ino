@@ -6,6 +6,9 @@
 #define leftMotorPin1 9
 #define leftMotorPin2 10
 
+#define ultraTrig 14
+#define ultraEcho 15
+
 #define starterServoPin 18
 
 #define rotateTime 600
@@ -24,6 +27,23 @@ void forwardRight() {
   digitalWrite(rightMotorPin1, LOW);
   digitalWrite(rightMotorPin2, HIGH);
 }
+
+boolean ultraCheck(){
+  /* Utilisation du capteur Ultrason HC-SR04 */
+
+long lecture_echo;
+long cm;
+
+  digitalWrite(ultraTrig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(ultraTrig, LOW);
+  lecture_echo = pulseIn(ultraEcho, HIGH);
+  cm = lecture_echo / 58;
+  Serial.print("Distancem : ");
+  Serial.print(cm);
+  Serial.println("cm");
+  delay(10);
+  }
 
 void stopRight() {
   digitalWrite(rightMotorPin1, LOW);
@@ -129,12 +149,17 @@ void initializeTimer1 () {
 
 void setup() {
   // Motor Right
-  pinMode(9, OUTPUT);
-  pinMode(10, OUTPUT);
+  pinMode(leftMotorPin1, OUTPUT);
+  pinMode(leftMotorPin2, OUTPUT);
 
   // Motor Left
-  pinMode(11, OUTPUT);
-  pinMode(12, OUTPUT);
+  pinMode(rightMotorPin1, OUTPUT);
+  pinMode(rightMotorPin2, OUTPUT);
+  
+  // Ultrason
+  pinMode(ultraTrig, OUTPUT);
+  digitalWrite(ultraTrig, LOW);
+  pinMode(ultraEcho, INPUT);
 
   // Serial
   Serial.begin(9600);
@@ -144,6 +169,7 @@ void setup() {
 
 void loop() {
   // TODO Script to win here ;)
+  ultraCheck();
 }
 
 // Serial
