@@ -8,7 +8,7 @@
 
 #define starterServoPin 18
 
-#define rotateTime 750
+#define rotateTime 600
 
 // Globals vars
 Servo starterServo;
@@ -180,15 +180,25 @@ void serialExecute()
 {
   switch (serialInput[0])
   {
+    case 'i':
     case 'I': // Initialize
-      setLeftSpeed(20);
-      break;
-    case 'R': // Rotation
-      if (serialInput[1] == 'L') rotateLeft();
-      else rotateRight();
+      initializeTimer1();
       break;
 
+    case 'r':
+    case 'R': // Rotation
+      if (serialInput[1] == 'L' || serialInput[1] == 'l'){
+        rotateLeft();
+        Serial.println("Step left!");
+        }
+      else {
+        rotateRight();
+        Serial.println("Step right!");
+        }
+      break;
+    case 'f':
     case 'F': // Front direction
+    Serial.println("Go!");
       setLeftSpeed( serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]);
       setRightSpeed( serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]);
       delay(1500);
@@ -197,23 +207,27 @@ void serialExecute()
       delay(400);
       stopMotors();
       break;
-
+    case 'b':
     case 'B': // Back direction
+    Serial.println("Revert revert revert!");
       setLeftSpeed( (serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]) * -1);
       setRightSpeed( (serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]) * -1);
 
       break;
-
+    case 's':
     case 'S': // Starting block
+    Serial.println("Lock'n'load!");
       prepareToStart();
       break;
-
+    case 'g':
     case 'G': // GO !!!
+    Serial.println("Smooth splosh");
       smoothSploch();
       break;
-
+    case 'W':
     case 'w': // Emergy stop
-      stopMotors();
+     Serial.println("Emergency Stop!!");
+               stopMotors();
       break;
 
     default:
