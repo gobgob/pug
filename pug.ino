@@ -6,7 +6,7 @@
 #define leftMotorPin1 9
 #define leftMotorPin2 10
 
-#define starterServoPin 15
+#define starterServoPin 18
 
 #define rotateTime 750
 
