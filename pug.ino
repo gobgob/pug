@@ -15,6 +15,8 @@ IntervalTimer motorTimer;
 
 #define rotateTime 600
 
+#define pinColor 2
+
 IntervalTimer ultraTimer;
 int ultraBuffer[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int ultraCompteur;
@@ -44,7 +46,7 @@ long ultraMesure() {
   digitalWrite(ultraTrig, HIGH);
   delayMicroseconds(10);
   digitalWrite(ultraTrig, LOW);
-  lecture_echo = pulseIn(ultraEcho, HIGH);
+  lecture_echo = pulseIn(ultraEcho, HIGH, 500000);
   cm = lecture_echo / 29;
 
   return cm;
@@ -64,6 +66,10 @@ void ultraCheck(void) {
     digitalWrite(13, LOW);
   }
   ultraCompteur++;
+}
+
+boolean isGreen(){
+ return digitalRead(pinColor);  
 }
 
 void stopRight() {
@@ -150,7 +156,7 @@ void manageMotors()
   if (rightSpeed == 100) stopRight();
   else if (loopCounter >= rightSpeed)forwardRight();
   else backwardRight();
-  
+
   if (leftSpeed == 100) stopLeft();
   else if (loopCounter >= leftSpeed)forwardLeft();
   else backwardLeft();
@@ -169,12 +175,15 @@ void setup() {
   motorTimer.begin(manageMotors, 30);
 
   // Ultrason
-  ultraTimer.begin(ultraCheck, 50000);
+ // ultraTimer.begin(ultraCheck, 50000);
   pinMode(ultraTrig, OUTPUT);
   digitalWrite(ultraTrig, LOW);
   pinMode(ultraEcho, INPUT);
   ultraCompteur = 1;
   ultraSum = 0;
+
+  // PinColor
+  pinMode(pinColor, INPUT);
 
   //DebugLed
   pinMode(13, OUTPUT);
@@ -186,7 +195,7 @@ void setup() {
 }
 
 void loop() {
-  // TODO Script to win here ;)
+  
 }
 
 // Serial
@@ -195,6 +204,13 @@ int serialPrompt = 0;
 
 void serialEvent()
 {
+    Serial.println("Ready to rock");
+  if (isGreen()) {
+    Serial.println("Je suis force verte");
+  } else {
+    Serial.println("Je suis force Jaune!!");
+  }
+  
   while (Serial.available())
   {
     char inChar = (char)Serial.read();
