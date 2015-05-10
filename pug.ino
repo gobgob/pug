@@ -1,10 +1,10 @@
 #include <Servo.h>
 
-#define rightMotorPin1 6
-#define rightMotorPin2 5
+#define rightMotorPin1 11
+#define rightMotorPin2 10
 
-#define leftMotorPin1 3
-#define leftMotorPin2 4
+#define leftMotorPin1 8
+#define leftMotorPin2 9
 
 IntervalTimer motorTimer;
 
@@ -13,10 +13,13 @@ IntervalTimer motorTimer;
 
 #define starterServoPin 19
 
-#define rotateTime 600
+#define rotateTimeLeft 570
+#define rotateTimeRight 500
 
 #define pinColor 2
 
+#define JUMPER 3
+bool endScript = false;
 IntervalTimer ultraTimer;
 int ultraBuffer[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int ultraCompteur;
@@ -117,7 +120,7 @@ void stopMotors() {
 void rotateRight() {
   setLeftSpeed( 60 );
   setRightSpeed( -60 );
-  delay(rotateTime);
+  delay(rotateTimeRight);
   stopMotors();
 }
 
@@ -127,7 +130,7 @@ void rotateRight() {
 void rotateLeft() {
   setLeftSpeed( -60 );
   setRightSpeed( 60 );
-  delay(rotateTime);
+  delay(rotateTimeLeft);
   stopMotors();
 }
 
@@ -187,14 +190,40 @@ void setup() {
 
   //DebugLed
   pinMode(13, OUTPUT);
+  
+  //Init Jumper
+  pinMode(JUMPER, INPUT);
 
   // Serial
   Serial.begin(9600);
+  
+    if (isGreen()) {
+    digitalWrite(13,LOW);
+  } else {
+    digitalWrite(13,HIGH);
+  }
+  
 
   //  initializeTimer1();
 }
 
 void loop() {
+  
+  if (!endScript){
+    for (int i = 0; i<2000; i++);
+    Serial.println("DEBUT DE SCRIPT");
+    Serial.println("Attente de Jumper...");
+    while(!digitalRead(JUMPER));
+    Serial.println("Debout!");
+    prepareToStart();
+    Serial.println("Retirer le jumper...");
+    while(digitalRead(JUMPER));
+    
+    
+    endScript = true;
+    Serial.println("FIN DE SCRIPT");
+    while(42);
+    }
   
 }
 
@@ -204,13 +233,6 @@ int serialPrompt = 0;
 
 void serialEvent()
 {
-    Serial.println("Ready to rock");
-  if (isGreen()) {
-    Serial.println("Je suis force verte");
-  } else {
-    Serial.println("Je suis force Jaune!!");
-  }
-  
   while (Serial.available())
   {
     char inChar = (char)Serial.read();
@@ -294,6 +316,13 @@ void serialExecute()
     case 'L':
       Serial.println("left on");
       setLeftSpeed( 30);
+      break;
+      
+    case 'j':
+    case 'J':
+      JUMPER != JUMPER;
+      if (JUMPER) Serial.println("Jumper On!");
+      else Serial.println("Jumper off");
       break;
 
 
