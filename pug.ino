@@ -71,8 +71,8 @@ void ultraCheck(void) {
   ultraCompteur++;
 }
 
-boolean isGreen(){
- return digitalRead(pinColor);  
+boolean isGreen() {
+  return digitalRead(pinColor);
 }
 
 void stopRight() {
@@ -135,16 +135,16 @@ void rotateLeft() {
 }
 
 // Vitesse entre 0 et 100
-void goBackward(int vitesse){
+void goBackward(int vitesse) {
   setLeftSpeed(-vitesse);
   setRightSpeed(-vitesse);
-      }
-      
-      // Vitesse entre 0 et 100
-void goForward(int vitesse){
+}
+
+// Vitesse entre 0 et 100
+void goForward(int vitesse) {
   setLeftSpeed(vitesse);
   setRightSpeed(vitesse);
-      }
+}
 
 // Servo control methods
 void smoothSploch () {
@@ -190,7 +190,7 @@ void setup() {
   motorTimer.begin(manageMotors, 30);
 
   // Ultrason
- // ultraTimer.begin(ultraCheck, 50000);
+  // ultraTimer.begin(ultraCheck, 50000);
   pinMode(ultraTrig, OUTPUT);
   digitalWrite(ultraTrig, LOW);
   pinMode(ultraEcho, INPUT);
@@ -202,65 +202,69 @@ void setup() {
 
   //DebugLed
   pinMode(13, OUTPUT);
-  
+
   //Init Jumper
   pinMode(JUMPER, INPUT);
 
   // Serial
   Serial.begin(9600);
-  
-    if (isGreen()) {
-    digitalWrite(13,LOW);
+
+  if (isGreen()) {
+    digitalWrite(13, LOW);
   } else {
-    digitalWrite(13,HIGH);
+    digitalWrite(13, HIGH);
   }
-  
+
 
   //  initializeTimer1();
 }
 
 void loop() {
-  
-  if (!endScript){
-    for (int i = 0; i<2000; i++);
+
+  if (!endScript) {
+    for (int i = 0; i < 2000; i++);
     Serial.println("DEBUT DE SCRIPT");
     Serial.println("Attente de Jumper...");
-    while(!digitalRead(JUMPER));
+    while (!digitalRead(JUMPER));
     Serial.println("Debout!");
     prepareToStart();
     Serial.println("Retirer le jumper...");
-    while(digitalRead(JUMPER));
+    while (digitalRead(JUMPER));
     smoothSploch();
     Serial.println("Descente!");
     Serial.println("Calibrage en cours...");
     goBackward(35);
     delay(3000);
     stopMotors();
-    
+
     goForward(30);
     delay(1800);
     goForward(1);
     delay(500);
     stopMotors();
     delay(1000);
-    rotateRight();
+    if (isGreen()) {
+      rotateLeft();
+    } else {
+      rotateRight();
+    }
     delay(1000);
     goBackward(60);
     delay(900);
     goBackward(1);
     delay(100);
     stopMotors();
-    
-    
-    
+
+
+
     Serial.println("Calibrage OK!");
-    
-    
+
+
     endScript = true;
     Serial.println("FIN DE SCRIPT");
-    while(42);
-    }
-  
+    while (42);
+  }
+
 }
 
 // Serial
@@ -353,7 +357,7 @@ void serialExecute()
       Serial.println("left on");
       setLeftSpeed( 30);
       break;
-      
+
     case 'j':
     case 'J':
       JUMPER != JUMPER;
