@@ -1,48 +1,76 @@
 #include <Servo.h>
 
+// debug mode
+#define debugUltrason true
+
+// Pins
 #define rightMotorPin1 11
 #define rightMotorPin2 10
 
 #define leftMotorPin1 8
 #define leftMotorPin2 9
 
-IntervalTimer motorTimer;
+#define colorPin 2
+#define jumperPin 3
 
 #define ultraTrig 20
 #define ultraEcho 21
 
 #define starterServoPin 19
 
+// Constants
 #define rotateTimeLeft 570
 #define rotateTimeRight 500
 
-#define pinColor 2
+#define minDistanceInCm 20
 
-#define JUMPER 3
-bool endScript = false;
 IntervalTimer ultraTimer;
-int ultraBuffer[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-int ultraCompteur;
-int ultraSum;
+IntervalTimer motorTimer;
 
-// Globals vars
+int ultraBuffer[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+int ultraCount = 1;
+int ultraSum = 0;
+boolean hasEnnemy = false;
+
+volatile int loopCounter = 0;
+volatile int leftSpeed = 100;
+volatile int rightSpeed = 100;
+
 Servo starterServo;
 
 // # Low level controls
-// ## Motor Right
-void backwardRight() {
+void _backwardRight() {
   digitalWrite(rightMotorPin1, HIGH);
   digitalWrite(rightMotorPin2, LOW);
 }
 
-void forwardRight() {
+void _forwardRight() {
   digitalWrite(rightMotorPin1, LOW);
   digitalWrite(rightMotorPin2, HIGH);
 }
 
-long ultraMesure() {
-  /* Utilisation du capteur Ultrason HC-SR04 */
+void _stopRight() {
+  digitalWrite(rightMotorPin1, LOW);
+  digitalWrite(rightMotorPin2, LOW);
+}
 
+// ## Motor Left
+void _backwardLeft() {
+  digitalWrite(leftMotorPin1, HIGH);
+  digitalWrite(leftMotorPin2, LOW);
+}
+
+void _forwardLeft() {
+  digitalWrite(leftMotorPin1, LOW);
+  digitalWrite(leftMotorPin2, HIGH);
+}
+
+void _stopLeft() {
+  digitalWrite(leftMotorPin1, LOW);
+  digitalWrite(leftMotorPin2, LOW);
+}
+
+long ultraMesure() {
   long lecture_echo;
   long cm;
 
@@ -55,60 +83,67 @@ long ultraMesure() {
   return cm;
 }
 
-void ultraCheck(void) {
-  int i = ultraCompteur % 10;
-  int first_i = (ultraCompteur + 1) % 10;
+/**
+ * Motors livecycle
+ **/
+void _motorsLivecycle()
+{
+  loopCounter = (loopCounter + 1) % 200;
+
+  if (rightSpeed == 100) _stopRight();
+  else if (loopCounter >= rightSpeed)_forwardRight();
+  else _backwardRight();
+
+  if (leftSpeed == 100) _stopLeft();
+  else if (loopCounter >= leftSpeed)_forwardLeft();
+  else _backwardLeft();
+
+}
+
+/**
+ * Ultrason livecycle
+ **/
+void _ultrasonLivecycle() {
+  int i = ultraCount % 10;
+  int j = (ultraCount + 1) % 10;
   ultraBuffer[i] = ultraMesure();
   ultraSum += ultraBuffer[i];
-  ultraSum -= ultraBuffer[first_i];
-  Serial.println(ultraSum / 10);
+  ultraSum -= ultraBuffer[j];
+  if (debugUltrason) Serial.println(ultraSum / 10);
 
-  if (ultraSum / 10 < 20) {
-    digitalWrite(13, HIGH);
-  } else {
-    digitalWrite(13, LOW);
-  }
-  ultraCompteur++;
+  hasEnnemy = (ultraSum / 10 < minDistanceInCm);
+  ultraCount++;
 }
 
+/**
+ * Returns true if robot is on green side.
+ **/
 boolean isGreen() {
-  return digitalRead(pinColor);
+  return digitalRead(colorPin);
 }
-
-void stopRight() {
-  digitalWrite(rightMotorPin1, LOW);
-  digitalWrite(rightMotorPin2, LOW);
-}
-
-// ## Motor Left
-void backwardLeft() {
-  digitalWrite(leftMotorPin1, HIGH);
-  digitalWrite(leftMotorPin2, LOW);
-}
-
-void forwardLeft() {
-  digitalWrite(leftMotorPin1, LOW);
-  digitalWrite(leftMotorPin2, HIGH);
-}
-
-void stopLeft() {
-  digitalWrite(leftMotorPin1, LOW);
-  digitalWrite(leftMotorPin2, LOW);
-}
-
-volatile int loopCounter = 0;
-volatile int leftSpeed = 100;
-volatile int rightSpeed = 100;
 
 // Motors controls methods
+
+/**
+ * Set left motor speed
+ * @param int speed - between -100 and 100
+ **/
 void setLeftSpeed(int speed) {
   leftSpeed = speed + 100;
 }
 
+/**
+ * Set right motor speed
+ * @param int speed - between -100 and 100
+ *
+ **/
 void setRightSpeed(int speed) {
   rightSpeed = speed + 100;
 }
 
+/**
+ * Stop motors (freewheel)
+ **/
 void stopMotors() {
   rightSpeed = 100;
   leftSpeed = 100;
@@ -134,49 +169,44 @@ void rotateLeft() {
   stopMotors();
 }
 
-// Vitesse entre 0 et 100
-void goBackward(int vitesse) {
-  setLeftSpeed(-vitesse);
-  setRightSpeed(-vitesse);
+/**
+ * Go backward
+ * @param int speed - between 0 and 100
+ **/
+void goBackward(int speed) {
+  setLeftSpeed(-speed);
+  setRightSpeed(-speed);
 }
 
-// Vitesse entre 0 et 100
-void goForward(int vitesse) {
-  setLeftSpeed(vitesse);
-  setRightSpeed(vitesse);
+/**
+ * Go forward
+ * @param int speed - between 0 and 100
+ **/
+void goForward(int speed) {
+  setLeftSpeed(speed);
+  setRightSpeed(speed);
 }
 
 // Servo control methods
+/**
+ * Do a smooth sploch! (vertical to horizontal)
+ **/
 void smoothSploch () {
   for (int i = 135; i > 30; i--) {
     starterServo.write(i);
     delay(50);
   }
   starterServo.detach();
-  //  initializeTimer1();
 }
 
+/**
+ * Put the robot in vertical mode
+ **/
 void prepareToStart () {
   starterServo.attach(starterServoPin);
   starterServo.write(135);
 }
 
-/**
- * Interrupt service routine
- **/
-void manageMotors()
-{
-  loopCounter = (loopCounter + 1) % 200;
-
-  if (rightSpeed == 100) stopRight();
-  else if (loopCounter >= rightSpeed)forwardRight();
-  else backwardRight();
-
-  if (leftSpeed == 100) stopLeft();
-  else if (loopCounter >= leftSpeed)forwardLeft();
-  else backwardLeft();
-
-}
 
 void setup() {
   // Motor Right
@@ -187,24 +217,23 @@ void setup() {
   pinMode(rightMotorPin1, OUTPUT);
   pinMode(rightMotorPin2, OUTPUT);
 
-  motorTimer.begin(manageMotors, 30);
+  motorTimer.begin(_motorsLivecycle, 30);
 
   // Ultrason
-  // ultraTimer.begin(ultraCheck, 50000);
   pinMode(ultraTrig, OUTPUT);
   digitalWrite(ultraTrig, LOW);
   pinMode(ultraEcho, INPUT);
-  ultraCompteur = 1;
-  ultraSum = 0;
+  
+  ultraTimer.begin(_ultrasonLivecycle, 50000);
 
-  // PinColor
-  pinMode(pinColor, INPUT);
+  // Color switch
+  pinMode(colorPin, INPUT);
 
-  //DebugLed
+  // Debug led
   pinMode(13, OUTPUT);
 
-  //Init Jumper
-  pinMode(JUMPER, INPUT);
+  // Jumper
+  pinMode(jumperPin, INPUT);
 
   // Serial
   Serial.begin(9600);
@@ -214,57 +243,45 @@ void setup() {
   } else {
     digitalWrite(13, HIGH);
   }
-
-
-  //  initializeTimer1();
 }
 
 void loop() {
+  // Waiting for a jumper
+  while (!digitalRead(jumperPin));
+  prepareToStart();
 
-  if (!endScript) {
-    for (int i = 0; i < 2000; i++);
-    Serial.println("DEBUT DE SCRIPT");
-    Serial.println("Attente de Jumper...");
-    while (!digitalRead(JUMPER));
-    Serial.println("Debout!");
-    prepareToStart();
-    Serial.println("Retirer le jumper...");
-    while (digitalRead(JUMPER));
-    smoothSploch();
-    Serial.println("Descente!");
-    Serial.println("Calibrage en cours...");
-    goBackward(35);
-    delay(3000);
-    stopMotors();
+  // Waiting for remove jumper to start
+  while (digitalRead(jumperPin));
+  smoothSploch();
 
-    goForward(30);
-    delay(1800);
-    goForward(1);
-    delay(500);
-    stopMotors();
-    delay(1000);
-    if (isGreen()) {
-      rotateLeft();
-    } else {
-      rotateRight();
-    }
-    delay(1000);
-    goBackward(60);
-    delay(900);
-    goBackward(1);
-    delay(100);
-    stopMotors();
+  // Calibration on table border
+  goBackward(35);
+  delay(3000);
 
+  // Forward
+  goForward(30);
+  delay(1800);
 
+  // Break!
+  goForward(1);
+  delay(500);
+  stopMotors();
+  delay(1000);
 
-    Serial.println("Calibrage OK!");
-
-
-    endScript = true;
-    Serial.println("FIN DE SCRIPT");
-    while (42);
+  // Rotate
+  if (isGreen()) {
+    rotateLeft();
+  } else {
+    rotateRight();
   }
+  delay(1000);
 
+  // Go upstair!
+  goBackward(60);
+  delay(900);
+  goBackward(1);
+  delay(100);
+  stopMotors();
 }
 
 // Serial
@@ -312,6 +329,7 @@ void serialExecute()
         Serial.println("Step right!");
       }
       break;
+      
     case 'f':
     case 'F': // Front direction
       Serial.println("Go!");
@@ -323,23 +341,26 @@ void serialExecute()
       delay(400);
       stopMotors();
       break;
+      
     case 'b':
     case 'B': // Back direction
       Serial.println("Revert revert revert!");
       setLeftSpeed( (serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]) * -1);
       setRightSpeed( (serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]) * -1);
-
       break;
+      
     case 's':
     case 'S': // Starting block
       Serial.println("Lock'n'load!");
       prepareToStart();
       break;
+      
     case 'g':
     case 'G': // GO !!!
       Serial.println("Smooth splosh");
       smoothSploch();
       break;
+
     case 'W':
     case 'w': // Emergy stop
       Serial.println("Emergency Stop!!");
@@ -349,22 +370,14 @@ void serialExecute()
     case 'd':
     case 'D':
       Serial.println("Right on");
-      setRightSpeed( 30);
+      setRightSpeed(30);
       break;
 
     case 'l':
     case 'L':
       Serial.println("left on");
-      setLeftSpeed( 30);
+      setLeftSpeed(30);
       break;
-
-    case 'j':
-    case 'J':
-      JUMPER != JUMPER;
-      if (JUMPER) Serial.println("Jumper On!");
-      else Serial.println("Jumper off");
-      break;
-
 
     default:
       Serial.print("Unkwnown command (");
