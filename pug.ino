@@ -134,6 +134,18 @@ void rotateLeft() {
   stopMotors();
 }
 
+// Vitesse entre 0 et 100
+void goBackward(int vitesse){
+  setLeftSpeed(-vitesse);
+  setRightSpeed(-vitesse);
+      }
+      
+      // Vitesse entre 0 et 100
+void goForward(int vitesse){
+  setLeftSpeed(vitesse);
+  setRightSpeed(vitesse);
+      }
+
 // Servo control methods
 void smoothSploch () {
   for (int i = 135; i > 30; i--) {
@@ -218,6 +230,30 @@ void loop() {
     prepareToStart();
     Serial.println("Retirer le jumper...");
     while(digitalRead(JUMPER));
+    smoothSploch();
+    Serial.println("Descente!");
+    Serial.println("Calibrage en cours...");
+    goBackward(35);
+    delay(3000);
+    stopMotors();
+    
+    goForward(30);
+    delay(1800);
+    goForward(1);
+    delay(500);
+    stopMotors();
+    delay(1000);
+    rotateRight();
+    delay(1000);
+    goBackward(60);
+    delay(900);
+    goBackward(1);
+    delay(100);
+    stopMotors();
+    
+    
+    
+    Serial.println("Calibrage OK!");
     
     
     endScript = true;
