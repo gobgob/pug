@@ -1,3 +1,10 @@
+#include <NewPing.h>
+
+#define TRIGGER_PIN  20  // Arduino pin tied to trigger pin on the ultrasonic sensor.
+#define ECHO_PIN     21  // Arduino pin tied to echo pin on the ultrasonic sensor.
+#define MAX_DISTANCE 200 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
+
+NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
 
 /**
  * Set right motor in backward position (low level)
@@ -55,23 +62,6 @@ void _stopLeft() {
 }
 
 /**
- * Get ultrason mesure in centimeters
- * @private
- **/
-long _ultraMesure() {
-  long echoTime;
-  long cm;
-
-  digitalWrite(ultraTrig, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(ultraTrig, LOW);
-  echoTime = pulseIn(ultraEcho, HIGH, 500000); // TODO fix blocking call (pulseIn)
-  cm = echoTime / 29;
-
-  return cm;
-}
-
-/**
  * Motors livecycle (call in a timer)
  * @private
  **/
@@ -93,15 +83,18 @@ void _motorsLivecycle()
  * Ultrason livecycle (call in a timer)
  * @private
  **/
-void _ultrasonLivecycle() {
+void _ultrasonLivecycle()
+{
   int i = ultraCount % 10;
   int j = (ultraCount + 1) % 10;
-  ultraBuffer[i] = _ultraMesure();
+
+  ultraBuffer[i] = sonar.ping_cm();
   ultraSum += ultraBuffer[i];
   ultraSum -= ultraBuffer[j];
   if (debugUltrason) Serial.println(ultraSum / 10);
 
   hasEnnemy = (ultraSum / 10 < minDistanceInCm);
+  digitalWrite(enemyLedPin, hasEnnemy);
   ultraCount++;
 }
 

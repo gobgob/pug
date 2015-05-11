@@ -12,9 +12,7 @@
 
 #define colorPin 2
 #define jumperPin 3
-
-#define ultraTrig 20
-#define ultraEcho 21
+#define enemyLedPin 5
 
 #define starterServoPin 19
 
@@ -148,12 +146,6 @@ void setup() {
   pinMode(rightMotorPin2, OUTPUT);
 
   motorTimer.begin(_motorsLivecycle, 30);
-
-  // Ultrason
-  pinMode(ultraTrig, OUTPUT);
-  digitalWrite(ultraTrig, LOW);
-  pinMode(ultraEcho, INPUT);
-
   ultraTimer.begin(_ultrasonLivecycle, 50000);
 
   // Color switch
@@ -161,6 +153,7 @@ void setup() {
 
   // Debug led
   pinMode(13, OUTPUT);
+  pinMode(enemyLedPin, OUTPUT);
 
   // Jumper
   pinMode(jumperPin, INPUT);
