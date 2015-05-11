@@ -179,12 +179,21 @@ void goBackward(int speed) {
 }
 
 /**
- * Go forward
+ * Go forward (with ennemy check)
  * @param int speed - between 0 and 100
+ * @param int duration - duration in Ms
  **/
-void goForward(int speed) {
-  setLeftSpeed(speed);
-  setRightSpeed(speed);
+void goForward(int speed, int duration) {
+  for ( int i = 0; i < duration * 10; i++) {
+    if (hasEnnemy) {
+      setLeftSpeed(-1); // Break!
+      setRightSpeed(-1); // Break!
+    } else {
+      setLeftSpeed(speed);
+      setRightSpeed(speed);
+    }
+    delay(10);
+  }
 }
 
 // Servo control methods
@@ -223,7 +232,7 @@ void setup() {
   pinMode(ultraTrig, OUTPUT);
   digitalWrite(ultraTrig, LOW);
   pinMode(ultraEcho, INPUT);
-  
+
   ultraTimer.begin(_ultrasonLivecycle, 50000);
 
   // Color switch
@@ -259,11 +268,10 @@ void loop() {
   delay(3000);
 
   // Forward
-  goForward(30);
-  delay(1800);
+  goForward(30, 1800);
 
   // Break!
-  goForward(1);
+  goBackward(1);
   delay(500);
   stopMotors();
   delay(1000);
@@ -329,7 +337,7 @@ void serialExecute()
         Serial.println("Step right!");
       }
       break;
-      
+
     case 'f':
     case 'F': // Front direction
       Serial.println("Go!");
@@ -341,20 +349,20 @@ void serialExecute()
       delay(400);
       stopMotors();
       break;
-      
+
     case 'b':
     case 'B': // Back direction
       Serial.println("Revert revert revert!");
       setLeftSpeed( (serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]) * -1);
       setRightSpeed( (serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]) * -1);
       break;
-      
+
     case 's':
     case 'S': // Starting block
       Serial.println("Lock'n'load!");
       prepareToStart();
       break;
-      
+
     case 'g':
     case 'G': // GO !!!
       Serial.println("Smooth splosh");
