@@ -10,7 +10,7 @@
 #define leftMotorPin1 8
 #define leftMotorPin2 9
 
-#define colorPin 2
+#define colorAnalogPin 1
 #define jumperPin 3
 
 #define enemyLedPin 13
@@ -43,7 +43,7 @@ Servo starterServo;
  * Returns true if robot is on green side.
  **/
 boolean isGreen() {
-  return digitalRead(colorPin);
+  return analogRead(colorAnalogPin) > 500;
 }
 
 /**
@@ -150,9 +150,6 @@ void setup() {
 
   motorTimer.begin(_motorsLivecycle, 30);
   ultraTimer.begin(_ultrasonLivecycle, 50000);
-
-  // Color switch
-  pinMode(colorPin, INPUT);
 
   // Debug led
   pinMode(enemyLedPin, OUTPUT);
