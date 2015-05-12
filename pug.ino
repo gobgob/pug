@@ -12,7 +12,10 @@
 
 #define colorPin 2
 #define jumperPin 3
-#define enemyLedPin 5
+
+#define enemyLedPin 13
+#define greenLedPin 7
+#define yellowLedPin 6
 
 #define starterServoPin 19
 
@@ -152,8 +155,11 @@ void setup() {
   pinMode(colorPin, INPUT);
 
   // Debug led
-  pinMode(13, OUTPUT);
   pinMode(enemyLedPin, OUTPUT);
+  pinMode(6, OUTPUT);
+  pinMode(7, OUTPUT);
+  digitalWrite(6, HIGH);
+  digitalWrite(7, HIGH);
 
   // Jumper
   pinMode(jumperPin, INPUT);
@@ -161,11 +167,9 @@ void setup() {
   // Serial
   Serial.begin(9600);
 
-  if (isGreen()) {
-    digitalWrite(13, LOW);
-  } else {
-    digitalWrite(13, HIGH);
-  }
+  // Highlight leds in function of robot color
+  digitalWrite(greenLedPin, isGreen());
+  digitalWrite(yellowLedPin, !isGreen());
 }
 
 void loop() {
