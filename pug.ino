@@ -148,7 +148,7 @@ void setup() {
   pinMode(rightMotorPin1, OUTPUT);
   pinMode(rightMotorPin2, OUTPUT);
 
-  motorTimer.begin(_motorsLivecycle, 30);
+  motorTimer.begin(_motorsLivecycle, 10);
   ultraTimer.begin(_ultrasonLivecycle, 50000);
 
   // Debug led
