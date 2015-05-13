@@ -31,7 +31,7 @@ IntervalTimer motorTimer;
 int ultraBuffer[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int ultraCount = 1;
 int ultraSum = 0;
-boolean hasEnnemy = false;
+volatile boolean hasEnnemy = false;
 
 volatile int loopCounter = 0;
 volatile int leftSpeed = 100;
@@ -106,7 +106,7 @@ void goBackward(int speed) {
  * @param int duration - duration in Ms
  **/
 void goForward(int speed, int duration) {
-  for ( int i = 0; i < duration * 10; i++) {
+  for ( int i = 0; i < duration / 10; i++) {
     if (hasEnnemy) {
       setLeftSpeed(-1); // Break!
       setRightSpeed(-1); // Break!
