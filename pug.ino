@@ -1,36 +1,39 @@
 #include <Servo.h>
 
 // debug mode
-#define debugUltrason false
+#define debugUltrason true
 
 // Pins
-#define rightMotorPin1 11
-#define rightMotorPin2 10
+#define RIGHT_MOTOR_PIN_1 11
+#define RIGHT_MOTOR_PIN_2 10
 
-#define leftMotorPin1 8
-#define leftMotorPin2 9
+#define LEFT_MOTOR_PIN_1 8
+#define LEFT_MOTOR_PIN_2 9
 
-#define colorAnalogPin 1
-#define jumperPin 3
+#define COLOR_ANALOG_PIN 1
+#define JUMPER_PIN 3
 
-#define enemyLedPin 13
-#define greenLedPin 7
-#define yellowLedPin 6
+#define ENEMY_LED_PIN 13
+#define GREEN_LED_PIN 7
+#define YELLOW_LED_PIN 6
 
-#define starterServoPin 19
+#define STARTER_SERVO_PIN 19
 
 // Constants
-#define rotateTimeLeft 570
-#define rotateTimeRight 500
+#define ROTATE_TIME_LEFT 570
+#define ROTATE_TIME_RIGHT 500
 
-#define minDistanceInCm 20
+#define MIN_DISTANCE_IN_CM 20
+
+
+#define ULTRASOUND true
 
 IntervalTimer ultraTimer;
 IntervalTimer motorTimer;
 
-int ultraBuffer[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-int ultraCount = 1;
-int ultraSum = 0;
+volatile unsigned int ultraBuffer[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+volatile unsigned int ultraCount = 1;
+volatile unsigned int ultraSum = 0;
 volatile boolean hasEnnemy = false;
 
 volatile int loopCounter = 0;
@@ -43,7 +46,7 @@ Servo starterServo;
  * Returns true if robot is on green side.
  **/
 boolean isGreen() {
-  return analogRead(colorAnalogPin) > 500;
+  return analogRead(COLOR_ANALOG_PIN) > 500;
 }
 
 /**
@@ -87,7 +90,7 @@ void rotateRight() {
 void rotateLeft() {
   setLeftSpeed( -60 );
   setRightSpeed( 60 );
-  delay(rotateTimeLeft);
+  delay(ROTATE_TIME_LEFT);
   stopMotors();
 }
 
@@ -107,9 +110,10 @@ void goBackward(int speed) {
  **/
 void goForward(int speed, int duration) {
   for ( int i = 0; i < duration / 10; i++) {
-    if (hasEnnemy) {
+    if (ULTRASOUND && hasEnnemy) {
       setLeftSpeed(-1); // Break!
       setRightSpeed(-1); // Break!
+      i--;
     } else {
       setLeftSpeed(speed);
       setRightSpeed(speed);
@@ -134,44 +138,44 @@ void smoothSploch () {
  * Put the robot in vertical mode
  **/
 void prepareToStart () {
-  starterServo.attach(starterServoPin);
+  starterServo.attach(STARTER_SERVO_PIN);
   starterServo.write(135);
 }
 
 
 void setup() {
   // Motor Right
-  pinMode(leftMotorPin1, OUTPUT);
-  pinMode(leftMotorPin2, OUTPUT);
+  pinMode(LEFT_MOTOR_PIN_1, OUTPUT);
+  pinMode(LEFT_MOTOR_PIN_2, OUTPUT);
 
   // Motor Left
-  pinMode(rightMotorPin1, OUTPUT);
-  pinMode(rightMotorPin2, OUTPUT);
+  pinMode(RIGHT_MOTOR_PIN_1, OUTPUT);
+  pinMode(RIGHT_MOTOR_PIN_2, OUTPUT);
 
   motorTimer.begin(_motorsLivecycle, 10);
-  ultraTimer.begin(_ultrasonLivecycle, 50000);
+  ultraTimer.begin(_ultrasonLivecycle, 25000);
 
   // Debug led
-  pinMode(enemyLedPin, OUTPUT);
+  pinMode(ENEMY_LED_PIN, OUTPUT);
   pinMode(6, OUTPUT);
   pinMode(7, OUTPUT);
   digitalWrite(6, HIGH);
   digitalWrite(7, HIGH);
 
   // Jumper
-  pinMode(jumperPin, INPUT);
+  pinMode(JUMPER_PIN, INPUT);
 
   // Serial
   Serial.begin(9600);
 
   // Highlight leds in function of robot color
-  digitalWrite(greenLedPin, isGreen());
-  digitalWrite(yellowLedPin, !isGreen());
+  digitalWrite(GREEN_LED_PIN, isGreen());
+  digitalWrite(YELLOW_LED_PIN, !isGreen());
 }
 
 void loop() {
   // Waiting for a jumper
-  while (!digitalRead(jumperPin));
+  while (!digitalRead(JUMPER_PIN));
   prepareToStart();
 
   // Waiting for remove jumper to start

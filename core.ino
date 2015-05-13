@@ -2,7 +2,7 @@
 
 #define TRIGGER_PIN  20  // Arduino pin tied to trigger pin on the ultrasonic sensor.
 #define ECHO_PIN     21  // Arduino pin tied to echo pin on the ultrasonic sensor.
-#define MAX_DISTANCE 200 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
+#define MAX_DISTANCE 400 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
 
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
 
@@ -11,8 +11,8 @@ NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and
  * @private
  **/
 void _backwardRight() {
-  digitalWrite(rightMotorPin1, HIGH);
-  digitalWrite(rightMotorPin2, LOW);
+  digitalWrite(RIGHT_MOTOR_PIN_1, HIGH);
+  digitalWrite(RIGHT_MOTOR_PIN_2, LOW);
 }
 
 
@@ -21,8 +21,8 @@ void _backwardRight() {
  * @private
  **/
 void _forwardRight() {
-  digitalWrite(rightMotorPin1, LOW);
-  digitalWrite(rightMotorPin2, HIGH);
+  digitalWrite(RIGHT_MOTOR_PIN_1, LOW);
+  digitalWrite(RIGHT_MOTOR_PIN_2, HIGH);
 }
 
 /**
@@ -30,8 +30,8 @@ void _forwardRight() {
  * @private
  **/
 void _stopRight() {
-  digitalWrite(rightMotorPin1, LOW);
-  digitalWrite(rightMotorPin2, LOW);
+  digitalWrite(RIGHT_MOTOR_PIN_1, LOW);
+  digitalWrite(RIGHT_MOTOR_PIN_2, LOW);
 }
 
 /**
@@ -39,8 +39,8 @@ void _stopRight() {
  * @private
  **/
 void _backwardLeft() {
-  digitalWrite(leftMotorPin1, HIGH);
-  digitalWrite(leftMotorPin2, LOW);
+  digitalWrite(LEFT_MOTOR_PIN_1, HIGH);
+  digitalWrite(LEFT_MOTOR_PIN_2, LOW);
 }
 
 /**
@@ -48,8 +48,8 @@ void _backwardLeft() {
  * @private
  **/
 void _forwardLeft() {
-  digitalWrite(leftMotorPin1, LOW);
-  digitalWrite(leftMotorPin2, HIGH);
+  digitalWrite(LEFT_MOTOR_PIN_1, LOW);
+  digitalWrite(LEFT_MOTOR_PIN_2, HIGH);
 }
 
 /**
@@ -57,8 +57,8 @@ void _forwardLeft() {
  * @private
  **/
 void _stopLeft() {
-  digitalWrite(leftMotorPin1, LOW);
-  digitalWrite(leftMotorPin2, LOW);
+  digitalWrite(LEFT_MOTOR_PIN_1, LOW);
+  digitalWrite(LEFT_MOTOR_PIN_2, LOW);
 }
 
 /**
@@ -86,15 +86,15 @@ void _motorsLivecycle()
 void _ultrasonLivecycle()
 {
   int i = ultraCount % 10;
-  int j = (ultraCount + 1) % 10;
 
+  ultraSum -= ultraBuffer[i];
   ultraBuffer[i] = sonar.ping_cm();
+  if(ultraBuffer[i]==0) ultraBuffer[i]=100; //bugfix, when nothing detected the lib return 0
   ultraSum += ultraBuffer[i];
-  ultraSum -= ultraBuffer[j];
   if (debugUltrason) Serial.println(ultraSum / 10);
 
-  hasEnnemy = (ultraSum / 10 < minDistanceInCm);
-  digitalWrite(enemyLedPin, hasEnnemy);
+  hasEnnemy = (ultraSum / 10 < MIN_DISTANCE_IN_CM);
+  digitalWrite(ENEMY_LED_PIN, hasEnnemy);
   ultraCount++;
 }
 
