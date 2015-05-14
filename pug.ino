@@ -4,11 +4,11 @@
 #define DEBUG_ULTRASON false
 
 // Pins
-#define RIGHT_MOTOR_PIN_1 11
-#define RIGHT_MOTOR_PIN_2 10
+#define RIGHT_MOTOR_PIN_1 8
+#define RIGHT_MOTOR_PIN_2 9
 
-#define LEFT_MOTOR_PIN_1 8
-#define LEFT_MOTOR_PIN_2 9
+#define LEFT_MOTOR_PIN_1 11
+#define LEFT_MOTOR_PIN_2 10
 
 #define COLOR_ANALOG_PIN 1
 #define JUMPER_PIN 3
