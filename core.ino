@@ -89,9 +89,9 @@ void _ultrasonLivecycle()
 
   ultraSum -= ultraBuffer[i];
   ultraBuffer[i] = sonar.ping_cm();
-  if(ultraBuffer[i]==0) ultraBuffer[i]=100; //bugfix, when nothing detected the lib return 0
+  if(ultraBuffer[i] == 0) ultraBuffer[i] = 100; //bugfix, when nothing detected the lib return 0
   ultraSum += ultraBuffer[i];
-  if (DEBUG_ULTRASON) Serial.println(ultraSum / 3);
+  if (DEBUG_ULTRASON) Serial.println( ultraSum / 3 );
 
   hasEnnemy = (ultraSum / 3 < MIN_DISTANCE_IN_CM);
   digitalWrite(ENEMY_LED_PIN, hasEnnemy);

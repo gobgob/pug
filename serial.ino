@@ -39,34 +39,45 @@ void serialExecute()
     case 'r':
     case 'R': // Rotation
       if (serialInput[1] == 'L' || serialInput[1] == 'l') {
-        rotateLeft();
-        Serial.println("Step left!");
+        rotateLeft(serialInput[2] * 100 + serialInput[3] * 10 + serialInput[4]);
+        Serial.print("Step left! -> ");
+        Serial.println(serialInput[2] * 100 + serialInput[3] * 10 + serialInput[4]);
       }
       else {
-        rotateRight();
-        Serial.println("Step right!");
+        rotateRight(serialInput[2] * 100 + serialInput[3] * 10 + serialInput[4]);
+        Serial.print("Step right! -> ");
+        Serial.println(serialInput[2] * 100 + serialInput[3] * 10 + serialInput[4]);
       }
       break;
 
     case 'f':
     case 'F': // Front direction
-      Serial.println("Go!");
-      setLeftSpeed( serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]);
-      setRightSpeed( serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]);
-      delay(1500);
-      setLeftSpeed( -2 );
-      setRightSpeed( -2);
-      delay(400);
+      Serial.print("Go! -> ");
+      Serial.println(serialInput[1] * 1000 + serialInput[2] * 100 + serialInput[3] * 10 + serialInput[4]);
+      goForward(30, serialInput[1] * 1000 + serialInput[2] * 100 + serialInput[3] * 10 + serialInput[4]);
+      goBackward(1); // Break!
+      delay(500);
       stopMotors();
       break;
 
     case 'b':
     case 'B': // Back direction
-      Serial.println("Revert revert revert!");
-      setLeftSpeed( (serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]) * -1);
-      setRightSpeed( (serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]) * -1);
+      Serial.print("Revert revert revert! -> ");
+      Serial.println(serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]);
+      goBackward(60);
+      delay(serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]);
+      goBackward(1);
+      delay(100);
+      stopMotors();
       break;
 
+    case 1: // Recalage
+      Serial.print("Recalage -> ");
+      Serial.println(serialInput[1] * 10 + serialInput[2]);
+      goBackward(serialInput[1] * 10 + serialInput[2]);
+      delay(3000);
+      stopMotors();
+      break;
     case 's':
     case 'S': // Starting block
       Serial.println("Lock'n'load!");

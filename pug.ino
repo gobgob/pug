@@ -2,6 +2,7 @@
 
 // debug mode
 #define DEBUG_ULTRASON false
+#define DEBUG false
 
 // Pins
 #define RIGHT_MOTOR_PIN_1 8
@@ -11,6 +12,8 @@
 #define LEFT_MOTOR_PIN_2 10
 
 #define COLOR_ANALOG_PIN 1
+#define POTARD_ANALOG_PIN 2
+
 #define JUMPER_PIN 3
 
 #define ENEMY_LED_PIN 13
@@ -18,10 +21,9 @@
 #define YELLOW_LED_PIN 6
 #define STARTER_SERVO_PIN 19
 
+// Ultrason
 #define MIN_DISTANCE_IN_CM 20
-
-
-#define ULTRASOUND true
+#define ULTRASOUND true // Disable ultrason if false
 
 IntervalTimer ultraTimer;
 IntervalTimer motorTimer;
@@ -42,6 +44,10 @@ Servo starterServo;
  **/
 boolean isGreen() {
   return analogRead(COLOR_ANALOG_PIN) > 500;
+}
+
+int getRotateDelay() {
+  return analogRead(POTARD_ANALOG_PIN);
 }
 
 /**
@@ -169,12 +175,21 @@ void setup() {
   digitalWrite(YELLOW_LED_PIN, !isGreen());
 }
 
+boolean hasCalibrate = false;
 void loop() {
+  if (DEBUG) return;
 
-// while (42){
-//   Serial.println(analogRead(COLOR_ANALOG_PIN));
-//   Serial.println(isGreen());
-// }
+  if (!hasCalibrate) {
+    // Turn for calibrate with potard rotation before the match
+    Serial.println(getRotateDelay());
+
+    if (isGreen()) {
+      rotateLeft(getRotateDelay());
+    } else {
+      rotateRight(getRotateDelay());
+    }
+    hasCalibrate = true;
+  }
 
   // Waiting for a jumper
   while (!digitalRead(JUMPER_PIN));
@@ -185,11 +200,13 @@ void loop() {
   smoothSploch();
 
   // Calibration on table border
-  goBackward(35);
-  delay(3000);
+  //  goBackward(20);
+  //  delay(3000);
+  //  stopMotors();
+  delay(1000);
 
   // Forward
-  goForward(30, 1800);
+  goForward(30, 850);
 
   // Break!
   goBackward(1);
@@ -199,15 +216,15 @@ void loop() {
 
   // Rotate
   if (isGreen()) {
-    rotateLeft();
+    rotateLeft(getRotateDelay());
   } else {
-    rotateRight();
+    rotateRight(getRotateDelay());
   }
   delay(1000);
 
   // Go upstair!
   goBackward(60);
-  delay(900);
+  delay(850);
   goBackward(1);
   delay(100);
   stopMotors();
