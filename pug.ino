@@ -16,12 +16,7 @@
 #define ENEMY_LED_PIN 13
 #define GREEN_LED_PIN 7
 #define YELLOW_LED_PIN 6
-
 #define STARTER_SERVO_PIN 19
-
-// Constants
-#define ROTATE_TIME_LEFT 570
-#define ROTATE_TIME_RIGHT 500
 
 #define MIN_DISTANCE_IN_CM 20
 
@@ -77,20 +72,21 @@ void stopMotors() {
 /**
  * Rotate of +/- 90° to right
  **/
-void rotateRight() {
+void rotateRight(int rotateTimeRight) {
   setLeftSpeed( 60 );
   setRightSpeed( -60 );
-  delay(ROTATE_TIME_RIGHT);
+  delay(rotateTimeRight);
   stopMotors();
 }
 
 /**
  * Rotate of +/- 90° to left
  **/
-void rotateLeft() {
+void rotateLeft(int rotateTimeLeft)
+{
   setLeftSpeed( -60 );
   setRightSpeed( 60 );
-  delay(ROTATE_TIME_LEFT);
+  delay(rotateTimeLeft);
   stopMotors();
 }
 
@@ -127,7 +123,7 @@ void goForward(int speed, int duration) {
  * Do a smooth sploch! (vertical to horizontal)
  **/
 void smoothSploch () {
-  for (int i = 135; i > 30; i--) {
+  for (int i = 130; i > 30; i--) {
     starterServo.write(i);
     delay(50);
   }
@@ -139,7 +135,7 @@ void smoothSploch () {
  **/
 void prepareToStart () {
   starterServo.attach(STARTER_SERVO_PIN);
-  starterServo.write(135);
+  starterServo.write(130);
 }
 
 
