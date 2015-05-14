@@ -1,7 +1,7 @@
 #include <Servo.h>
 
 // debug mode
-#define debugUltrason true
+#define debugUltrason false
 
 // Pins
 #define RIGHT_MOTOR_PIN_1 11
@@ -31,7 +31,7 @@
 IntervalTimer ultraTimer;
 IntervalTimer motorTimer;
 
-volatile unsigned int ultraBuffer[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+volatile unsigned int ultraBuffer[3] = {0, 0, 0};
 volatile unsigned int ultraCount = 1;
 volatile unsigned int ultraSum = 0;
 volatile boolean hasEnnemy = false;
@@ -80,7 +80,7 @@ void stopMotors() {
 void rotateRight() {
   setLeftSpeed( 60 );
   setRightSpeed( -60 );
-  delay(rotateTimeRight);
+  delay(ROTATE_TIME_RIGHT);
   stopMotors();
 }
 
@@ -109,7 +109,7 @@ void goBackward(int speed) {
  * @param int duration - duration in Ms
  **/
 void goForward(int speed, int duration) {
-  for ( int i = 0; i < duration / 10; i++) {
+  for ( int i = 0; i < duration / 1; i++) {
     if (ULTRASOUND && hasEnnemy) {
       setLeftSpeed(-1); // Break!
       setRightSpeed(-1); // Break!
@@ -118,7 +118,7 @@ void goForward(int speed, int duration) {
       setLeftSpeed(speed);
       setRightSpeed(speed);
     }
-    delay(10);
+    delay(1);
   }
 }
 
@@ -174,12 +174,18 @@ void setup() {
 }
 
 void loop() {
+
+// while (42){
+//   Serial.println(analogRead(COLOR_ANALOG_PIN));
+//   Serial.println(isGreen());
+// }
+
   // Waiting for a jumper
   while (!digitalRead(JUMPER_PIN));
   prepareToStart();
 
   // Waiting for remove jumper to start
-  while (digitalRead(jumperPin));
+  while (digitalRead(JUMPER_PIN));
   smoothSploch();
 
   // Calibration on table border
