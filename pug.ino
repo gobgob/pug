@@ -1,7 +1,7 @@
 #include <Servo.h>
 
 // debug mode
-#define debugUltrason false
+#define DEBUG_ULTRASON false
 
 // Pins
 #define RIGHT_MOTOR_PIN_1 11
