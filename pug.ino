@@ -211,7 +211,7 @@ void loop() {
   delay(START_TIMER);
 
   // Forward
-  goForward(30, 850);
+  goForward(30, 900);
 
   // Break!
   goBackward(1);
