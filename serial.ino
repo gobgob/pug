@@ -102,18 +102,27 @@ void serialExecute()
       setRightSpeed(30);
       break;
 
+    // TELECOMMAND API
     case 'l':
+      Serial.println("left back");
+      setLeftSpeed(- serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]);
+      break;
+
     case 'L':
-      Serial.println("left on");
+      Serial.println("left front");
       setLeftSpeed(serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]);
       break;
 
+    case 'r':
+      Serial.println("right back");
+      setRightSpeed(- serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]);
+      break;
     case 'R':
-      Serial.println("right on");
+      Serial.println("right front");
       setRightSpeed(serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]);
       break;
-      
-      case 'V':
+
+    case 'V':
       Serial.println("PUG");
       break;
 
