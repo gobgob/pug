@@ -21,6 +21,9 @@
 #define YELLOW_LED_PIN 6
 #define STARTER_SERVO_PIN 19
 
+// Timer de start en ms
+#define START_TIMER 15000
+
 // Ultrason
 #define MIN_DISTANCE_IN_CM 20
 #define ULTRASOUND true // Disable ultrason if false
@@ -203,7 +206,9 @@ void loop() {
   //  goBackward(20);
   //  delay(3000);
   //  stopMotors();
-  delay(1000);
+  
+  // Tempo before start.
+  delay(START_TIMER);
 
   // Forward
   goForward(30, 850);
