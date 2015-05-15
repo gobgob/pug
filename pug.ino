@@ -31,6 +31,7 @@
 // Goodies mode
 #define TOUPIE false
 #define TOUPIE_2 false
+#define JUMP false
 
 IntervalTimer ultraTimer;
 IntervalTimer motorTimer;
@@ -189,6 +190,16 @@ void setup() {
 boolean hasCalibrate = false;
 void loop() {
   if (DEBUG) return;
+  
+  if(JUMP){
+    while (!digitalRead(JUMPER_PIN));
+    while (digitalRead(JUMPER_PIN));
+    setLeftSpeed( 100 );
+    setRightSpeed(100);
+    delay(5000);
+    stopMotors();
+    return;
+  }
 
   if (TOUPIE) {
     while (!digitalRead(JUMPER_PIN));
@@ -197,6 +208,7 @@ void loop() {
     setRightSpeed( -100 );
     delay(5000);
     stopMotors();
+    return;
   }
 
   if(TOUPIE_2) {
@@ -211,6 +223,7 @@ void loop() {
     setRightSpeed(100);
     delay(1000);
     stopMotors();
+    return;
   }
 
   if (!hasCalibrate) {
