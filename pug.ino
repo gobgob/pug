@@ -21,7 +21,7 @@
 #define YELLOW_LED_PIN 6
 #define STARTER_SERVO_PIN 19
 
-// Timer de start en ms
+// Start timer in ms
 #define START_TIMER 15000
 
 // Ultrason
