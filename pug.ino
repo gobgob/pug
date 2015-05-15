@@ -132,9 +132,13 @@ void goForward(int speed, int duration) {
  * Do a smooth sploch! (vertical to horizontal)
  **/
 void smoothSploch () {
-  for (int i = 130; i > 30; i--) {
+  for (int i = 130; i > 90; i--) {
     starterServo.write(i);
     delay(50);
+  }
+  for (int i = 90; i > 30; i--) {
+    starterServo.write(i);
+    delay(10);
   }
   starterServo.detach();
 }
