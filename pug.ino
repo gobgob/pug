@@ -28,6 +28,9 @@
 #define MIN_DISTANCE_IN_CM 20
 #define ULTRASOUND true // Disable ultrason if false
 
+// Goodies mode
+#define TOUPIE true
+
 IntervalTimer ultraTimer;
 IntervalTimer motorTimer;
 
@@ -185,6 +188,14 @@ void setup() {
 boolean hasCalibrate = false;
 void loop() {
   if (DEBUG) return;
+  if (TOUPIE) {
+    while (!digitalRead(JUMPER_PIN));
+    while (digitalRead(JUMPER_PIN));
+    setLeftSpeed( 100 );
+    setRightSpeed( -100 );
+    delay(5000);
+    stopMotors();
+  }
 
   if (!hasCalibrate) {
     // Turn for calibrate with potard rotation before the match
@@ -210,16 +221,16 @@ void loop() {
   //  goBackward(20);
   //  delay(3000);
   //  stopMotors();
-  
+
   // Tempo before start.
-  delay(START_TIMER);
+  //delay(START_TIMER);
 
   // Forward
-  goForward(30, 900);
+  goForward(30, 950); // 900 before morning calibration ;)
 
   // Break!
   goBackward(1);
-  delay(500);
+  delay(100);
   stopMotors();
   delay(1000);
 
