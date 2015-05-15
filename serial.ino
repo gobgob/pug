@@ -36,19 +36,19 @@ void serialExecute()
 {
   switch (serialInput[0])
   {
-    case 'r':
-    case 'R': // Rotation
-      if (serialInput[1] == 'L' || serialInput[1] == 'l') {
-        rotateLeft(serialInput[2] * 100 + serialInput[3] * 10 + serialInput[4]);
-        Serial.print("Step left! -> ");
-        Serial.println(serialInput[2] * 100 + serialInput[3] * 10 + serialInput[4]);
-      }
-      else {
-        rotateRight(serialInput[2] * 100 + serialInput[3] * 10 + serialInput[4]);
-        Serial.print("Step right! -> ");
-        Serial.println(serialInput[2] * 100 + serialInput[3] * 10 + serialInput[4]);
-      }
-      break;
+    //    case 'r':
+    //    case 'R': // Rotation
+    //      if (serialInput[1] == 'L' || serialInput[1] == 'l') {
+    //        rotateLeft(serialInput[2] * 100 + serialInput[3] * 10 + serialInput[4]);
+    //        Serial.print("Step left! -> ");
+    //        Serial.println(serialInput[2] * 100 + serialInput[3] * 10 + serialInput[4]);
+    //      }
+    //      else {
+    //        rotateRight(serialInput[2] * 100 + serialInput[3] * 10 + serialInput[4]);
+    //        Serial.print("Step right! -> ");
+    //        Serial.println(serialInput[2] * 100 + serialInput[3] * 10 + serialInput[4]);
+    //      }
+    //      break;
 
     case 'f':
     case 'F': // Front direction
@@ -105,7 +105,16 @@ void serialExecute()
     case 'l':
     case 'L':
       Serial.println("left on");
-      setLeftSpeed(30);
+      setLeftSpeed(serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]);
+      break;
+
+    case 'R':
+      Serial.println("right on");
+      setRightSpeed(serialInput[1] * 100 + serialInput[2] * 10 + serialInput[3]);
+      break;
+      
+      case 'V':
+      Serial.println("PUG");
       break;
 
     default:
