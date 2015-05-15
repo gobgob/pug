@@ -29,7 +29,8 @@
 #define ULTRASOUND true // Disable ultrason if false
 
 // Goodies mode
-#define TOUPIE true
+#define TOUPIE false
+#define TOUPIE_2 false
 
 IntervalTimer ultraTimer;
 IntervalTimer motorTimer;
@@ -188,12 +189,27 @@ void setup() {
 boolean hasCalibrate = false;
 void loop() {
   if (DEBUG) return;
+
   if (TOUPIE) {
     while (!digitalRead(JUMPER_PIN));
     while (digitalRead(JUMPER_PIN));
     setLeftSpeed( 100 );
     setRightSpeed( -100 );
     delay(5000);
+    stopMotors();
+  }
+
+  if(TOUPIE_2) {
+    while (!digitalRead(JUMPER_PIN));
+    while (digitalRead(JUMPER_PIN));
+    setLeftSpeed(100);
+    setRightSpeed(100);
+    delay(500);
+    setLeftSpeed(-100);
+    setRightSpeed(-100);
+    delay(200);
+    setRightSpeed(100);
+    delay(1000);
     stopMotors();
   }
 
@@ -223,7 +239,7 @@ void loop() {
   //  stopMotors();
 
   // Tempo before start.
-  //delay(START_TIMER);
+  delay(START_TIMER);
 
   // Forward
   goForward(30, 950); // 900 before morning calibration ;)
