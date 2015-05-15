@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+    
+ 
+    
+    <body>
+        <h1>PUG telecommande</h1>
+        <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+        <script src="http://localhost/socket.io/socket.io.js"></script>
+        <script>
+		
+		var socket = io();
+		var speed = 60;
+		
+		$( "body" ).on( "keypress", function ( event ) {
+			switch ( event.charCode ) {
+			case 100:
+			case 119:
+				socket.emit("rightMotor", speed);
+			break;
+			
+			case 115:
+			case 231:
+				socket.emit("rightMotor", -speed);
+			break;
+			
+			case 112:
+			case 98:
+				socket.emit("leftMotor", speed);
+			break;
+			
+			case 105:
+			case 97:
+				socket.emit("leftMotor", -speed);
+			break;
+			
+			default:
+				socket.emit("leftMotor", 0);
+				socket.emit("rightMotor", 0);
+				console.log( event.charCode );
+			break;
+			}
+		} );
+	    $( "body" ).on( "keyup", function ( event ) {
+			console.log("stop!");
+			socket.emit("leftMotor", 0);
+			socket.emit("rightMotor", 0);
+	    });
+		</script>
+    </body>
+
+</html>
